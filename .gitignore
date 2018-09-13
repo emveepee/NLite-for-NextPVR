@@ -1,6 +1,5 @@
 
 nlite/\.vscode/
+nlite/build/
 
-nlite/build/\.vscode/
-
-nlite/build/Makefile
+*.cmake

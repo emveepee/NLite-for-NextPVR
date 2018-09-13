@@ -8,6 +8,7 @@ public:
 	bool FindServer();
 	void GetBaseURL(char *buf, int len);
 	void GetSID(char *buf, int len);
+	void SetServer(char *server);	
 
 private:
 	bool InitiateSession();

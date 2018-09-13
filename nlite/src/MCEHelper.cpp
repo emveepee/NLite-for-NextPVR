@@ -1,3 +1,4 @@
+#ifdef WIN32
 #include "stdafx.h"
 #include "MCEHelper.h"
 #include <Windows.h>
@@ -31,3 +32,4 @@ unsigned int MCEHelper::GetTranslatedMCE(unsigned int lParam, unsigned int wPara
 
 	return 0;
 }
+#endif

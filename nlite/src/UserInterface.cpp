@@ -269,7 +269,7 @@ void UserInterface::ProcessActivity()
 				if (p == NULL)
 				{					
 					// setup video playback for single url							
-					char videoURL[512];
+					char videoURL[2048];
 					sprintf(videoURL, "%s%s&sid=%s", baseURL, activity, sid);
 
 					// special case for network URLs
@@ -307,7 +307,7 @@ void UserInterface::ProcessActivity()
 					if (index > 0)
 					{
 						// setup video playback for first url						
-						char streamURL[512];
+						char streamURL[2048];
 						sprintf(streamURL, "%s%s&sid=%s", baseURL, activity, sid);
 						printf("About to ask for: %s\n", streamURL);
 						videoPlayer = new Player(this, streamURL, context.renderer, context.videoTexture, context.mutex, userServerSkip, durationSeconds, useGPU);
@@ -374,7 +374,7 @@ void UserInterface::HandleMouseMoveEvent(SDL_Event *sdlEvent)
 		imageChunk.size = 0;    /* no data at this point */ 
 
 		// build URL to call
-		char url[512];
+		char url[2048];
 		if (sdlEvent->button.clicks == 2)
 		{
 			sprintf(url, "%s/control?quality=high&client=%s&move=%dx%d&sid=%s", baseURL, clientID, x, y, sid);
@@ -492,7 +492,7 @@ void UserInterface::HandleMouseEvent(SDL_Event *sdlEvent)
 			imageChunk.size = 0;    /* no data at this point */ 
 
 			// build URL to call
-			char url[512];
+			char url[2048];
 			if (sdlEvent->button.clicks == 2)
 			{
 				sprintf(url, "%s/control?quality=high&client=%s&dblclick=%dx%d&sid=%s", baseURL, clientID, x, y, sid);
@@ -813,7 +813,7 @@ void UserInterface::HandleKeyboardEvent(SDL_Event *sdlEvent)
 			imageChunk.size = 0;    /* no data at this point */ 
 
 			// send keystroke download, and it'll return the current screen as a jpg
-			char url[512];
+			char url[2048];
 			sprintf(url, "%s/control?quality=high&client=%s&key=%d&sid=%s", baseURL, clientID, action, sid);
 			if (DownloadURL(url, &imageChunk) == false)
 			{
@@ -899,7 +899,7 @@ void UserInterface::StopPlayback(const char *message)
 		videoPlayer = NULL;
 
 		// let NextPVR session known that playback session has stopped (so it starts present menus from now on)
-		char url[512];
+		char url[2048];
 		if (message == NULL)
 		{
 			sprintf(url, "%s/control?client=%s&media=stop&sid=%s", baseURL, clientID, sid);
@@ -958,7 +958,7 @@ void UserInterface::PlaybackPosition(double position)
 	if (videoPlayer != NULL)
 	{
 		// let NextPVR session known that playback session has stopped (so it starts present menus from now on)
-		char url[512];
+		char url[2048];
 		sprintf(url, "%s/control?client=%s&media=%f&sid=%s", baseURL, clientID, position, sid);
 
 		// prepare for screen image
@@ -1253,7 +1253,7 @@ int UserInterface::Run(int argc, char *argv[])
 
 	// make sure any previous playback on this webclient host has stopped.
 	{
-		char url[512];
+		char url[2048];
 		sprintf(url, "%s/control?client=%s&media=stop&sid=%s", baseURL, clientID, sid);
 		
 		// prepare for request
@@ -1343,17 +1343,17 @@ int UserInterface::Run(int argc, char *argv[])
 
 				case SDL_SYSWMEVENT:
 					{
+#ifdef WIN32
 						if (event.syswm.msg->subsystem == SDL_SYSWM_WINDOWS)
 						{
-#ifdef WIN32
 							// enable access to MCE remote control events on Windows
 							if (event.syswm.msg->msg.win.msg == WM_INPUT)
 							{
 								SDL_Log("WM_APPCOMMAND");
 								MCEHelper::GetTranslatedMCE(event.syswm.msg->msg.win.lParam, event.syswm.msg->msg.win.wParam);
 							}
-#endif
-						}						
+						}
+#endif	
 					}
 					break;
 
