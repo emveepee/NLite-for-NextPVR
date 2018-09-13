@@ -1,0 +1,6 @@
+
+nlite/\.vscode/
+
+nlite/build/\.vscode/
+
+nlite/build/Makefile
