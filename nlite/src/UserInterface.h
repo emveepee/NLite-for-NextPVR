@@ -30,7 +30,7 @@ public:
 
 private:
 	bool NeedsRendering();
-	void ProcessActivity();
+	bool ProcessActivity(bool updates=false);
 	void HandleKeyboardEvent(SDL_Event *sdlEvent);
 	void HandleMouseEvent(SDL_Event *sdlEvent);
 	void HandleMouseMoveEvent(SDL_Event *sdlEvent);

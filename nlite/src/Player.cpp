@@ -104,8 +104,8 @@ Player::Player(PlayerDelegate *playerDelegate, char *url, SDL_Renderer *renderer
 	libvlc_event_attach(em, libvlc_MediaPlayerEndReached, playerEventSTUB, this);
 
 	// default to auto for mp4/avi/mkv
-	//aspectRatioMode = AspectRatio_Fill;
-	aspectRatioMode = AspectRatio_Auto;
+	aspectRatioMode = AspectRatio_Fill;
+	//aspectRatioMode = AspectRatio_Auto;
 	if (strstr(url, ".mp4") != NULL || strstr(url, ".mkv") != NULL || strstr(url, ".avi") != NULL || strstr(url, ".m4v") != NULL)
 	{
 		aspectRatioMode = AspectRatio_Auto;
@@ -878,7 +878,7 @@ void Player::Tick()
 	{
 		if (nextPositionNotificationEvent < SDL_GetTicks() && paused == false)
 		{
-			double currentPosition = ((lastKnownPosition + (SDL_GetTicks() - lastKnownPositionTimestamp)) / 1000.0);
+			double currentPosition = lastKnownPosition + (((SDL_GetTicks() - lastKnownPositionTimestamp)) / 1000.0);
 			playerDelegate->PlaybackPosition(currentPosition);
 
 			// lets do it all again in another second or so

@@ -22,7 +22,9 @@ extern "C"
 #include <SDL_ttf.h>
 
 #include <curl/curl.h>
-
+#ifdef WIN32
+#define ssize_t size_t
+#endif
 #include "vlc/vlc.h"
 }
 
@@ -38,10 +40,10 @@ extern "C"
 #include <SDL_syswm.h>
 #include "MCEHelper.h"
 #pragma comment(lib, "../libcurl/libcurl.lib")
-#pragma comment(lib, "../vlc/libvlc.lib")
+#pragma comment(lib, "../vlc/lib/libvlc.lib")
 #pragma comment(lib, "../SDL2/lib/x86/SDL2.lib")
-#pragma comment(lib, "../SDL2_image-2.0.0/lib/x86/SDL2_image.lib")
-#pragma comment(lib, "../SDL2_ttf-2.0.12/lib/x86/SDL2_ttf.lib")
+#pragma comment(lib, "../SDL2_image/lib/x86/SDL2_image.lib")
+#pragma comment(lib, "../SDL2_ttf/lib/x86/SDL2_ttf.lib")
 #undef main
 #else
 #include <unistd.h>
@@ -76,14 +78,15 @@ UserInterface::UserInterface()
 }
 
 bool UserInterface::NeedsRendering()
-{
+{	
+	/*
 	char url[2048];
 	sprintf(url, "%s/activity?client=%s&updates=1&sid=%s", baseURL, clientID, sid);
 
 	// check if any action was requested
 	struct MemoryStruct activityChunk; 
-	activityChunk.memory = (unsigned char *)malloc(1);  /* will be grown as needed by the realloc above */ 
-	activityChunk.size = 0;    /* no data at this point */ 
+	activityChunk.memory = (unsigned char *)malloc(1);  
+	activityChunk.size = 0;    
 	DownloadURL(url, &activityChunk);
 
 	if (activityChunk.size > 0)
@@ -94,7 +97,9 @@ bool UserInterface::NeedsRendering()
 			return true;
 		}
 	}
-	return false;
+
+	return false;*/
+	return ProcessActivity(true);
 }
 
 void UserInterface::GenerateOSDMessage(const char *message)
@@ -117,10 +122,14 @@ void UserInterface::GenerateOSDMessage(const char *message)
 	}
 }
 
-void UserInterface::ProcessActivity()
+bool UserInterface::ProcessActivity(bool updates)
 {	
 	char url[2048];
 	sprintf(url, "%s/activity?client=%s&format=xml&sid=%s", baseURL, clientID, sid);		
+	if (updates)
+	{
+		strcat(url, "&updates=1");
+	}
 
 	// check if any action was requested
 	struct MemoryStruct activityChunk; 
@@ -132,13 +141,21 @@ void UserInterface::ProcessActivity()
 	if (activityChunk.size > 0)
 	{		
 		printf("activity: \n%s\n", activityChunk.memory);
+		
+		if (updates)
+		{
+			if (strstr((const char *)activityChunk.memory, "<needsRendering>true</needsRendering>") != NULL)
+			{
+				return true;
+			}
+		}
 
 		// load xml dom		
 		tinyxml2::XMLDocument doc;
 		doc.Parse((const char *)activityChunk.memory);
 
 		char *activity = new char[activityChunk.size + 1];
-		activity[0] = '\0';
+		activity[0] = '\0';		
 
 		// extract activity from xml
 		int skipToSeconds = -1;
@@ -163,9 +180,13 @@ void UserInterface::ProcessActivity()
 			if (actionNode != NULL)
 			{
 				const char *actionText = actionNode->GetText();
-				if (actionText != NULL)
+				if (actionText != NULL && strcmp(actionText,"exit") == 0)
 				{
 					strcpy(activity, actionText);		
+				}
+				else
+				{
+					printf("Ignoring action %s\n", actionText);
 				}
 			}
 
@@ -338,6 +359,7 @@ void UserInterface::ProcessActivity()
 		delete []activity;
 	}
 	free(activityChunk.memory);
+	return false;
 }
 
 void UserInterface::HandleMouseWheelEvent(SDL_Event *sdlEvent)
@@ -1533,16 +1555,16 @@ LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT *pNumArgs)
 
 
 
-//int _tmain(int argc, _TCHAR* argv[])
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPSTR lpCmdLine, int nShowCmd)
+int main(int argc, _TCHAR* argv[])
+//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPSTR lpCmdLine, int nShowCmd)
 #else
 int main(int argc, char *argv[])
 #endif
 {
 #ifdef WIN32	
 	//ShowWindow(GetConsoleWindow(), SW_HIDE);
-	int argc;
-	LPSTR *argv = CommandLineToArgvA(GetCommandLineA(), &argc);
+	//int argc;
+	//LPSTR *argv = CommandLineToArgvA(GetCommandLineA(), &argc);
 
 #endif
 

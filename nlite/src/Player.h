@@ -4,7 +4,9 @@
 #include "SDL_mutex.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-
+#ifdef WIN32
+#define ssize_t size_t
+#endif
 #include "vlc/vlc.h"
 
 #define MAX_QUEUE_SIZE 200
